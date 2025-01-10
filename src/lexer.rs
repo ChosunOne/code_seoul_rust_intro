@@ -105,7 +105,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn it_scans_end_of_file() {
+    fn it_lexes_end_of_file() {
         let source = "";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -135,7 +135,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_an_identifier() {
+    fn it_lexes_an_identifier() {
         let source = "identifier\nidentifier1234\nidentifier_1234";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -168,7 +168,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_a_number() {
+    fn it_lexes_a_number() {
         let source = "12345.6789\n54321";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -193,7 +193,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_single_characters() {
+    fn it_lexes_single_characters() {
         let source = "(){};,.-+/*! = < > $";
         let mut lexer = Lexer::new(source.into());
         let expected_tokens = vec![
@@ -285,7 +285,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_double_tokens() {
+    fn it_lexes_double_tokens() {
         let source = "== <= >= !=";
         let mut lexer = Lexer::new(source.into());
         let expected_tokens = vec![
@@ -318,7 +318,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_a_string() {
+    fn it_lexes_a_string() {
         let source = "\"hello world\"";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -348,7 +348,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_a_boolean() {
+    fn it_lexes_a_boolean() {
         let source = "true false";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -372,7 +372,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_a_nil() {
+    fn it_lexes_a_nil() {
         let source = "nil";
         let mut lexer = Lexer::new(source.into());
         let token = lexer.next().unwrap();
@@ -387,7 +387,7 @@ mod test {
     }
 
     #[test]
-    fn it_scans_a_keyword() {
+    fn it_lexes_a_keyword() {
         let source = "and class else for fun if or print return super this var while";
         let mut lexer = Lexer::new(source.into());
         let expected_tokens = [
@@ -460,6 +460,220 @@ mod test {
 
         for token in expected_tokens {
             assert_eq!(lexer.next().unwrap(), token);
+        }
+    }
+    #[test]
+    fn it_lexes_a_simple_program() {
+        let source = r#"
+            fun fib(x) {
+                if (x < 2) {
+                    return 1;
+                }
+                return fib(x - 1) + fib(x - 2);
+            }
+            fib(20);
+        "#;
+        let mut scanner = Lexer::new(source.into());
+        let expected_tokens = vec![
+            Token {
+                kind: TokenType::Fun,
+                lexeme: "fun".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "fib".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::LeftParen,
+                lexeme: "(".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "x".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::RightParen,
+                lexeme: ")".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::LeftBrace,
+                lexeme: "{".into(),
+                line: 2,
+            },
+            Token {
+                kind: TokenType::If,
+                lexeme: "if".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::LeftParen,
+                lexeme: "(".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "x".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::Less,
+                lexeme: "<".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::Number,
+                lexeme: "2".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::RightParen,
+                lexeme: ")".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::LeftBrace,
+                lexeme: "{".into(),
+                line: 3,
+            },
+            Token {
+                kind: TokenType::Return,
+                lexeme: "return".into(),
+                line: 4,
+            },
+            Token {
+                kind: TokenType::Number,
+                lexeme: "1".into(),
+                line: 4,
+            },
+            Token {
+                kind: TokenType::Semicolon,
+                lexeme: ";".into(),
+                line: 4,
+            },
+            Token {
+                kind: TokenType::RightBrace,
+                lexeme: "}".into(),
+                line: 5,
+            },
+            Token {
+                kind: TokenType::Return,
+                lexeme: "return".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "fib".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::LeftParen,
+                lexeme: "(".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "x".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Minus,
+                lexeme: "-".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Number,
+                lexeme: "1".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::RightParen,
+                lexeme: ")".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Plus,
+                lexeme: "+".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "fib".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::LeftParen,
+                lexeme: "(".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "x".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Minus,
+                lexeme: "-".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Number,
+                lexeme: "2".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::RightParen,
+                lexeme: ")".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::Semicolon,
+                lexeme: ";".into(),
+                line: 6,
+            },
+            Token {
+                kind: TokenType::RightBrace,
+                lexeme: "}".into(),
+                line: 7,
+            },
+            Token {
+                kind: TokenType::Identifier,
+                lexeme: "fib".into(),
+                line: 8,
+            },
+            Token {
+                kind: TokenType::LeftParen,
+                lexeme: "(".into(),
+                line: 8,
+            },
+            Token {
+                kind: TokenType::Number,
+                lexeme: "20".into(),
+                line: 8,
+            },
+            Token {
+                kind: TokenType::RightParen,
+                lexeme: ")".into(),
+                line: 8,
+            },
+            Token {
+                kind: TokenType::Semicolon,
+                lexeme: ";".into(),
+                line: 8,
+            },
+            Token {
+                kind: TokenType::Eof,
+                lexeme: "".into(),
+                line: 9,
+            },
+        ];
+
+        for token in expected_tokens {
+            assert_eq!(scanner.next().unwrap(), token);
         }
     }
 }
