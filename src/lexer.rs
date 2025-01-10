@@ -76,6 +76,7 @@ impl Lexer {
         self.iter_peek().is_none()
     }
 
+    /// Return an identifier or keyword if present
     fn identifier_or_keyword(&mut self) -> Option<Token> {
         todo!()
     }
